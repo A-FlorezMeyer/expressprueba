@@ -21,7 +21,7 @@ function Listener() {
   });
 
   // Vincula el puerto e ip
-  listener.bind(52022, "192.168.1.16");
+  listener.bind(52022);
 }
 
 module.exports = {
