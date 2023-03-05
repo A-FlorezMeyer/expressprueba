@@ -20,8 +20,8 @@ ec2.describeInstances(function(err, data) {
     const privateIp = data.Reservations[0].Instances[0].PrivateIpAddress;
   }
 });
-
-app.set('port', 80);
+var port = 80
+app.set('port', port);
 
 /**
  * Create HTTP server.
