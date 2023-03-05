@@ -1,0 +1,58 @@
+var createError = require('http-errors');
+var express = require('express');
+var path = require('path');
+var cookieParser = require('cookie-parser');
+var logger = require('morgan');
+var udplistener = require('./listener/index');
+var indexRouter = require('./routes/index');
+var usersRouter = require('./routes/users');
+var homeRouter = require('./routes/home');
+var app = express();
+const { message } = require('./listener/index.js');
+
+// view engine setup
+
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
+
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+udplistener.Listener()
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
+app.use('/prueba',homeRouter);
+app.get('/prueba/api/valor',(req,res) =>{
+  try{
+    if (message.value != null) {
+      var gpsdata = message.value.split(";");
+      var gpsjson = {
+        latitud: gpsdata[0],
+        longitud: gpsdata[1],
+        altitud: gpsdata[2],
+        timestamp: parseInt(gpsdata[3], 10),
+      };
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify(gpsjson));
+    }
+  } catch (err){
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+  
+});
+
+// error handler
+app.use(function(err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
+});
+
+module.exports = app;
